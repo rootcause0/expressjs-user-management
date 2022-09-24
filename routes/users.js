@@ -13,7 +13,7 @@ router.post('/register', function (req, res, next) {
   const userName = req.body.userName
   const password = req.body.password
 
-  const hashedPassword = bcrypt.hashSync(req.body.password, process.env.BCRYPT_SALT)
+  const hashedPassword = bcrypt.hashSync(password, process.env.BCRYPT_SALT)
 
   let insertSql = "INSERT INTO ?? (name,password) VALUES(?,?)"
   const inserts = ['users', userName, hashedPassword]
@@ -26,5 +26,35 @@ router.post('/register', function (req, res, next) {
   res.send('The user has been successfully registered!')
 
 })
+
+/* POST users login (create session) */
+router.post('/login', function (req, res, next) {
+  if (!(req.session.username)) {
+    const userName = req.body.userName
+    const password = req.body.password
+
+    const hashedPassword = bcrypt.hashSync(password, process.env.BCRYPT_SALT)
+
+    let selectSql = "SELECT * FROM ?? WHERE name=? AND password=?"
+    const selects = ['users', userName, hashedPassword]
+
+    selectSql = db.mysql.format(selectSql, selects)
+
+    db.connection.query(selectSql, function (error, results, fields) {
+      if (error)
+        throw error
+      if (results.length > 0) {
+        req.session.username = results[0].name
+        res.send('You\'re successfully signed in !')
+      }
+      else
+        res.send('Invalid login credentials!')
+    })
+  } else {
+    res.send('You\'re already signed in!')
+  }
+
+})
+
 
 module.exports = router;
