@@ -56,5 +56,15 @@ router.post('/login', function (req, res, next) {
 
 })
 
+/* POST users logout (destroy session) */
+router.post('/logout', function (req, res, next) {
+  if (!(req.session.username))
+    res.send('You\'re not signed in yet!')
+  else {
+    req.session.destroy()
+    res.send('You\'ve successfully logout!')
+  }
+})
+
 
 module.exports = router;
